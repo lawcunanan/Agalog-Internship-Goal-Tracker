@@ -15,11 +15,11 @@ export const signOutUser = async (
 		}
 
 		showAlert(200, "Signed out successfully");
+		router.refresh();
 		router.push("/");
 	} catch (error: any) {
 		console.error("Error signing out", error);
 		showAlert(500, "Error signing out");
-		throw error;
 	} finally {
 		setIsLoading(false);
 	}

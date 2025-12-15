@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu } from "lucide-react";
@@ -12,16 +12,23 @@ import {
 	DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/providers/auth-provider";
+import { useAlert } from "@/providers/alert-provider";
+import { signOutUser } from "@/services/auth/logout";
+import { useState } from "react";
 
 export function Header() {
 	const pathname = usePathname();
+	const router = useRouter();
+	const { userDetails } = useAuth();
+	const { showAlert } = useAlert();
+	const [isLoading, setIsLoading] = useState(false);
+
 	const buttonClass = "w-full justify-start cursor-pointer";
 	const buttonSize = "sm";
 
-	const user = {
-		displayName: "John Doe",
-		email: "johndoe@example.com",
-		photoURL: "",
+	const handleLogout = () => {
+		signOutUser(showAlert, router, setIsLoading);
 	};
 
 	return (
@@ -63,19 +70,19 @@ export function Header() {
 									<div className="flex flex-col items-center gap-2 mb-2">
 										<Avatar className="h-12 w-12">
 											<AvatarImage
-												src={user?.photoURL || undefined}
-												alt={user?.displayName || "User"}
+												src={userDetails?.avatar_url || undefined}
+												alt={userDetails?.full_name || "User"}
 											/>
 											<AvatarFallback>
-												{user?.displayName?.charAt(0) || "U"}
+												{userDetails?.full_name?.charAt(0) || "U"}
 											</AvatarFallback>
 										</Avatar>
 										<div className="flex flex-col items-center">
 											<p className="text-sm font-medium">
-												{user?.displayName || "User"}
+												{userDetails?.full_name || "User"}
 											</p>
 											<p className="text-xs text-muted-foreground">
-												{user?.email || "user@example.com"}
+												{userDetails?.email || "user@example.com"}
 											</p>
 										</div>
 									</div>
@@ -104,8 +111,10 @@ export function Header() {
 										variant="ghost"
 										size={buttonSize}
 										className={`${buttonClass} text-destructive hover:text-destructive`}
+										onClick={handleLogout}
+										disabled={isLoading}
 									>
-										Logout
+										{isLoading ? "Logging out..." : "Logout"}
 									</Button>
 								</div>
 							</DropdownMenuContent>
