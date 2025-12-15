@@ -20,8 +20,8 @@ export function ThemeToggle() {
 		const isActive = theme === mode;
 		const activeClasses =
 			mode === "light"
-				? "bg-orange-500 text-white shadow-sm hover:bg-orange-600"
-				: "bg-violet-500 text-white shadow-sm hover:bg-violet-600";
+				? "bg-orange-500 text-white shadow-sm hover:text-white hover:bg-orange-600"
+				: "bg-violet-500 text-white shadow-sm hover:text-white hover:bg-violet-600";
 
 		return (
 			<Button
