@@ -14,7 +14,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { useAlert } from "@/providers/alert-provider";
 
 export interface UserDetails {
-	id: string;
+	id: number;
 	auth_id: string;
 	role?: "Student" | "Admin";
 	email?: string;
