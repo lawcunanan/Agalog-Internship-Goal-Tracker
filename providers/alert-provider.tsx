@@ -53,7 +53,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
 					<div
 						key={alert.id}
 						className={cn(
-							"pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white max-w-[550px] animate-in slide-in-from-right-full transition-all",
+							"pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white max-w-137.5 animate-in slide-in-from-right-full transition-all",
 							alert.type === "success" && "bg-green-600",
 							alert.type === "warning" && "bg-yellow-600",
 							alert.type === "danger" && "bg-red-600",

@@ -70,7 +70,6 @@ export async function middleware(request: NextRequest) {
 		}
 
 		const userRole = userData?.role;
-		console.log("Middleware: User Role:", userRole); // Debug log
 
 		// Redirect logged-in users from landing page based on role
 		if (path === "/") {
@@ -79,10 +78,6 @@ export async function middleware(request: NextRequest) {
 			} else if (userRole === "Admin") {
 				return NextResponse.redirect(new URL("/dashboard", request.url));
 			} else {
-				console.log(
-					"Middleware: No matching role found, redirecting to unauthorized. Role was:",
-					userRole,
-				);
 				return NextResponse.redirect(new URL("/unauthorized", request.url));
 			}
 		}

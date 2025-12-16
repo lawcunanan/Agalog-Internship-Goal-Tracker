@@ -1,13 +1,18 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { TypewriterText } from "@/components/ui/typewriter-text";
 import { signInWithGoogle } from "@/services/auth/login";
 import { useAlert } from "@/providers/alert-provider";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
+	const searchParams = useSearchParams();
 	const { showAlert } = useAlert();
+	const userRole = searchParams.get("role");
+
 	return (
 		<main className="min-h-screen flex flex-col">
 			<Header />
@@ -38,9 +43,13 @@ export default function Home() {
 
 					<div className="flex items-center justify-center gap-4 pt-4">
 						<button
-							onClick={() => signInWithGoogle(showAlert)}
+							onClick={() => signInWithGoogle(userRole, showAlert)}
 							type="button"
-							className="h-12 px-8 min-w-50 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2 justify-center border border-transparent font-medium cursor-pointer"
+							className={cn(
+								"h-12 px-8 min-w-50 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2 justify-center border border-transparent font-medium cursor-pointer",
+								userRole?.toLowerCase() === "admin" &&
+									"border-b-4 border-red-500",
+							)}
 						>
 							<svg className="w-5 h-5" viewBox="0 0 24 24">
 								<path
