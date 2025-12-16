@@ -14,6 +14,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/providers/auth-provider";
 import { LogoutDialog } from "@/components/dialogs/logout-dialog";
+import { GoalsDialog } from "@/components/dialogs/goals-dialog";
+import { ProfileDialog } from "@/components/dialogs/profile-dialog";
 
 export function Header() {
 	const pathname = usePathname();
@@ -87,16 +89,28 @@ export function Header() {
 											>
 												Download Report
 											</Button>
-
-											<Button
-												variant="ghost"
-												size={buttonSize}
-												className={buttonClass}
-											>
-												Edit Goal
-											</Button>
 										</>
 									)}
+
+									<GoalsDialog>
+										<Button
+											variant="ghost"
+											size={buttonSize}
+											className={buttonClass}
+										>
+											Manage Goals
+										</Button>
+									</GoalsDialog>
+
+									<ProfileDialog>
+										<Button
+											variant="ghost"
+											size={buttonSize}
+											className={buttonClass}
+										>
+											Profile
+										</Button>
+									</ProfileDialog>
 
 									<LogoutDialog>
 										<Button
