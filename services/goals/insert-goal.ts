@@ -2,7 +2,8 @@ import { supabase } from "@/lib/supabase";
 import { generateToken } from "@/lib/utils/generateToken";
 
 export const insertGoal = async (
-	userId: number,
+	userId: string,
+	role: string,
 	values: { title?: string; goal?: number },
 	showAlert: (status: number, message: string) => void,
 	setIsLoading: (loading: boolean) => void,
@@ -14,8 +15,13 @@ export const insertGoal = async (
 			throw new Error("User ID is required");
 		}
 
-		const pubToken = generateToken(6);
-		const priToken = generateToken(6);
+		let pubToken = null;
+		let priToken = null;
+
+		if (["Super Admin", "Admin"].includes(role)) {
+			pubToken = generateToken(24);
+			priToken = generateToken(24);
+		}
 
 		const { data: goalData, error: goalError } = await supabase
 			.from("goals")
@@ -28,14 +34,14 @@ export const insertGoal = async (
 					priToken,
 				},
 			])
-			.select("id")
+			.select("goal_id")
 			.single();
 
 		if (goalError || !goalData) {
 			throw goalError;
 		}
 
-		const goalId = goalData.id;
+		const goalId = goalData.goal_id;
 
 		const { error: contributorError } = await supabase
 			.from("contributors")

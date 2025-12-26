@@ -1,29 +1,33 @@
 import { supabase } from "@/lib/supabase";
 
 export const updateGoalStatus = async (
-	goalId: number,
-	status: "Active" | "Completed" | "Archived",
+	userId: string,
+	goalId: string,
+	status: "Active" | "Inactive",
 	showAlert: (status: number, message: string) => void,
-	setIsLoading: (loading: boolean) => void,
 ) => {
-	setIsLoading(true);
-
 	try {
 		if (!goalId) throw new Error("Goal ID is required");
 		if (!status) throw new Error("Status is required");
 
-		const { error } = await supabase
+		const { error: goalError } = await supabase
 			.from("goals")
 			.update({ status })
-			.eq("id", goalId);
+			.eq("goal_id", goalId);
 
-		if (error) throw error;
+		if (goalError) throw goalError;
 
-		showAlert(200, `Goal marked as ${status}`);
+		const { error: contributorError } = await supabase
+			.from("contributors")
+			.update({ status })
+			.eq("user_id", userId)
+			.eq("goal_id", goalId);
+
+		if (contributorError) throw contributorError;
+
+		showAlert(200, `Goal and contributors marked as ${status}`);
 	} catch (error: any) {
 		console.error("Update goal status error:", error);
 		showAlert(500, error.message || "Failed to update goal status");
-	} finally {
-		setIsLoading(false);
 	}
 };

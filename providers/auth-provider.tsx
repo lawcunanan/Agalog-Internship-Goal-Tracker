@@ -14,10 +14,10 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { useAlert } from "@/providers/alert-provider";
 
 export interface UserDetails {
-	id: number;
-	auth_id: string;
-	role?: "Student" | "Admin";
+	user_id: string;
+	role?: "Student" | "Admin" | "Super Admin";
 	email?: string;
+	section?: string;
 	full_name?: string;
 	avatar_url?: string;
 	status?: string;
@@ -42,11 +42,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		let mounted = true;
 
-		const fetchUserDetails = async (authId: string) => {
+		const fetchUserDetails = async (userId: string) => {
 			const { data, error } = await supabase
 				.from("users")
 				.select("*")
-				.eq("auth_id", authId)
+				.eq("user_id", userId)
 				.maybeSingle();
 
 			if (error) {

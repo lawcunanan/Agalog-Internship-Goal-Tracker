@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect, use } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	AlertDialog,
@@ -15,20 +15,47 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import { updateProfile } from "@/services/users/update-profile";
+import { UserDetails } from "@/providers/auth-provider";
 
-export function ProfileDialog({ children }: { children: React.ReactNode }) {
-	const [name, setName] = useState("Juan Dela Cruz");
-	const [section, setSection] = useState("BSIT 3-A");
+export function ProfileDialog({
+	children,
+	userId,
+	userDetails,
+	showAlert,
+}: {
+	children: React.ReactNode;
+	userId?: string;
+	userDetails?: UserDetails | null;
+	showAlert: (status: number, message: string) => void;
+}) {
+	const [full_name, setFullname] = useState<string>("");
+	const [section, setSection] = useState<string>("");
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const handleSaveProfile = () => {
-		if (!name.trim() || !section.trim()) {
-			alert("Please fill in all fields");
+		if (!userId) {
+			showAlert(500, "User ID is missing");
+			return;
+		}
+
+		if (!full_name.trim() || !section.trim()) {
+			showAlert(400, "Please fill in all fields");
 			return;
 		}
 
 		// Handle save logic here
-		alert(`Profile updated!\nName: ${name}\nSection: ${section}`);
+		updateProfile(userId, { full_name, section }, showAlert, setIsLoading);
 	};
+
+	useEffect(() => {
+		if (userDetails?.full_name) {
+			setFullname(userDetails.full_name);
+		}
+		if (userDetails?.section) {
+			setSection(userDetails.section);
+		}
+	}, [userDetails]);
 
 	return (
 		<AlertDialog>
@@ -37,7 +64,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
 				<AlertDialogHeader>
 					<div className="flex items-center justify-between">
 						<AlertDialogTitle>Edit Profile</AlertDialogTitle>
-						<AlertDialogCancel className="border-none shadow-none p-0 h-auto bg-transparent hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent">
+						<AlertDialogCancel className="border-none p-0">
 							<X className="h-4 w-4" />
 						</AlertDialogCancel>
 					</div>
@@ -55,8 +82,8 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
 							id="name"
 							type="text"
 							placeholder="Enter your name"
-							value={name}
-							onChange={(e) => setName(e.target.value)}
+							value={full_name}
+							onChange={(e) => setFullname(e.target.value)}
 							className="mt-1.5"
 						/>
 					</div>
@@ -75,8 +102,12 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
 						/>
 					</div>
 
-					<Button onClick={handleSaveProfile} className="w-full">
-						Save Changes
+					<Button
+						onClick={handleSaveProfile}
+						className="w-full"
+						disabled={isLoading}
+					>
+						{isLoading ? "Saving..." : "Save Changes"}
 					</Button>
 				</div>
 			</AlertDialogContent>

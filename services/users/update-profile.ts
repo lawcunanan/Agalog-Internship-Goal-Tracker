@@ -14,7 +14,7 @@ export const updateProfile = async (
 		const { error } = await supabase
 			.from("users")
 			.update(values)
-			.eq("id", userId);
+			.eq("user_id", userId);
 
 		if (error) {
 			throw error;
@@ -23,7 +23,7 @@ export const updateProfile = async (
 		showAlert(200, "Profile updated successfully");
 	} catch (error: any) {
 		console.error("Error updating profile", error);
-		showAlert(500, "Error  updating profile");
+		showAlert(500, error.message);
 	} finally {
 		setIsLoading(false);
 	}

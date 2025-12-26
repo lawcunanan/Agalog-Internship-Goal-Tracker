@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
 export const updateGoalDetails = async (
-	goalId: number,
+	goalId: string,
 	values: {
 		title?: string;
 		goal?: number;
@@ -18,9 +18,9 @@ export const updateGoalDetails = async (
 			.from("goals")
 			.update({
 				title: values.title,
-				goal: values.goal,
+				goal: values.goal || 400,
 			})
-			.eq("id", goalId);
+			.eq("goal_id", goalId);
 
 		if (error) throw error;
 

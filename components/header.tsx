@@ -16,10 +16,17 @@ import { useAuth } from "@/providers/auth-provider";
 import { LogoutDialog } from "@/components/dialogs/logout-dialog";
 import { GoalsDialog } from "@/components/dialogs/goals-dialog";
 import { ProfileDialog } from "@/components/dialogs/profile-dialog";
+import { useAlert } from "@/providers/alert-provider";
 
-export function Header() {
+interface HeaderProps {
+	selectedGoal?: string;
+	setSelectedGoal?: (goalId: string) => void;
+}
+
+export function Header({ selectedGoal, setSelectedGoal }: HeaderProps) {
 	const pathname = usePathname();
-	const { userDetails } = useAuth();
+	const { user, userDetails } = useAuth();
+	const { showAlert } = useAlert();
 
 	const buttonClass = "w-full justify-start cursor-pointer";
 	const buttonSize = "sm";
@@ -92,7 +99,13 @@ export function Header() {
 										</>
 									)}
 
-									<GoalsDialog>
+									<GoalsDialog
+										userId={user?.id || ""}
+										userDetails={userDetails || ({} as any)}
+										selectedGoal={selectedGoal || ""}
+										setSelectedGoal={setSelectedGoal || (() => {})}
+										showAlert={showAlert}
+									>
 										<Button
 											variant="ghost"
 											size={buttonSize}
@@ -101,8 +114,11 @@ export function Header() {
 											Manage Goals
 										</Button>
 									</GoalsDialog>
-
-									<ProfileDialog>
+									<ProfileDialog
+										userId={user?.id || ""}
+										userDetails={userDetails || ({} as any)}
+										showAlert={showAlert}
+									>
 										<Button
 											variant="ghost"
 											size={buttonSize}
@@ -111,7 +127,6 @@ export function Header() {
 											Profile
 										</Button>
 									</ProfileDialog>
-
 									<LogoutDialog>
 										<Button
 											variant="ghost"

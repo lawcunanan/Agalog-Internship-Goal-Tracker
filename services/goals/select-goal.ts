@@ -1,7 +1,8 @@
 import { supabase } from "@/lib/supabase";
 
 export const getUserGoals = async (
-	userId: number,
+	userId: string,
+	role: string,
 	setGoals: (goals: any[]) => void,
 	showAlert: (status: number, message: string) => void,
 	setIsLoading: (loading: boolean) => void,
@@ -11,25 +12,30 @@ export const getUserGoals = async (
 	try {
 		if (!userId) throw new Error("User ID is required");
 
+		const isAdmin = ["Super Admin", "Admin"].includes(role);
+
 		const { data, error } = await supabase
 			.from("contributors")
 			.select(
 				`
-                    id,
-                    role,
-                    status,
-                    goals (
-                    id,
-                    title,
-                    goal,
-                    status,
-                    created_at
-                    )
-                `,
+				contributor_id,
+				role,
+				status,
+				goals!inner (
+					goal_id,
+					title,
+					goal,
+					status,
+					created_by,
+					created_at
+					${isAdmin ? ", pubToken, priToken" : ""}
+				)
+				`,
 			)
 			.eq("user_id", userId)
 			.eq("status", "Active")
-			.neq("goals.status", "Inactive");
+			.eq("goals.status", "Active")
+			.order("created_at", { ascending: false });
 
 		if (error) throw error;
 

@@ -52,13 +52,13 @@ export async function GET(request: NextRequest) {
 
 	const { data: existingUser } = await supabase
 		.from("users")
-		.select("auth_id")
-		.eq("auth_id", user.id)
+		.select("user_id")
+		.eq("user_id", user.id)
 		.single();
 
 	if (!existingUser) {
 		await supabase.from("users").insert({
-			auth_id: user.id,
+			user_id: user.id,
 			email: user.email,
 			full_name: user.user_metadata.full_name ?? "",
 			avatar_url: user.user_metadata.avatar_url ?? "",

@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
 
 export const insertContributor = async (
-	userId: number,
-	role: "Student" | "Admin" | "Owner",
+	userId: string,
+	role: "Student" | "Admin" | "Super Admin",
 	token: string,
 	showAlert: (status: number, message: string) => void,
 	setIsLoading: (loading: boolean) => void,
@@ -17,33 +17,60 @@ export const insertContributor = async (
 
 		const { data: goalData, error: goalError } = await supabase
 			.from("goals")
-			.select("id")
+			.select("goal_id, created_by")
 			.eq(tokenColumn, token)
 			.eq("status", "Active")
+			.neq("created_by", userId)
 			.single();
 
 		if (goalError || !goalData) {
-			throw new Error("Invalid or inactive token");
+			throw new Error("Invalid token, inactive goal, or you are the owner");
 		}
 
-		const goalId = goalData.id;
+		const goalId = goalData.goal_id;
 
-		const { error: contributorError } = await supabase
+		const { data: existingContributor, error: checkError } = await supabase
 			.from("contributors")
-			.insert([
-				{
-					goal_id: goalId,
-					user_id: userId,
-					status: "Active",
-					role,
-				},
-			]);
+			.select("contributor_id, status")
+			.eq("goal_id", goalId)
+			.eq("user_id", userId)
+			.single();
 
-		if (contributorError) {
-			throw contributorError;
+		if (checkError && checkError.code !== "PGRST116") {
+			throw checkError;
 		}
 
-		showAlert(200, "Successfully joined the goal");
+		if (existingContributor) {
+			if (existingContributor.status === "Active") {
+				return showAlert(400, "You are already a contributor for this goal");
+			}
+
+			// Reactivate existing contributor
+			const { error: updateError } = await supabase
+				.from("contributors")
+				.update({ status: "Active" })
+				.eq("contributor_id", existingContributor.contributor_id);
+
+			if (updateError) throw updateError;
+
+			showAlert(200, "You are re-activated as a contributor for this goal");
+		} else {
+			// Insert new contributor
+			const { error: contributorError } = await supabase
+				.from("contributors")
+				.insert([
+					{
+						goal_id: goalId,
+						user_id: userId,
+						status: "Active",
+						role,
+					},
+				]);
+
+			if (contributorError) throw contributorError;
+
+			showAlert(200, "Successfully joined the goal");
+		}
 	} catch (error: any) {
 		console.error("Insert contributor error:", error);
 		showAlert(500, error.message || "Failed to join goal");
