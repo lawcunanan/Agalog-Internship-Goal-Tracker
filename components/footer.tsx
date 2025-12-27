@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 export function Footer() {
 	const pathname = usePathname();
-	const isAttendance = pathname === "/logss";
+	const isAttendance = pathname === "/logs";
 
 	return (
 		<footer className="w-full py-8  mt-8">

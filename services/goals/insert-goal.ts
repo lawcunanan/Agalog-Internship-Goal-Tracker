@@ -1,10 +1,11 @@
 import { supabase } from "@/lib/supabase";
 import { generateToken } from "@/lib/utils/generateToken";
+import { GoalValues } from "@/lib/types";
 
 export const insertGoal = async (
 	userId: string,
 	role: string,
-	values: { title?: string; goal?: number },
+	values: GoalValues,
 	showAlert: (status: number, message: string) => void,
 	setIsLoading: (loading: boolean) => void,
 ) => {

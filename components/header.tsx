@@ -60,7 +60,11 @@ export function Header({ selectedGoal, setSelectedGoal }: HeaderProps) {
 					{["/logs", "/dashboard"].includes(pathname) && (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" size="icon" className="cursor-pointer">
+								<Button
+									variant="ghost"
+									size="icon"
+									className="cursor-pointer border"
+								>
 									<Menu className="h-6 w-6" />
 								</Button>
 							</DropdownMenuTrigger>

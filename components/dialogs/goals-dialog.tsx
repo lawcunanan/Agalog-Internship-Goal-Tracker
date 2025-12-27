@@ -39,18 +39,7 @@ import { updateGoalStatus } from "@/services/goals/delete-goal";
 import { insertContributor } from "@/services/contributor/insert-contributor";
 import { getUserGoals } from "@/services/goals/select-goal";
 import { leaveGoalAsContributor } from "@/services/contributor/leave-contributor";
-
-type Goal = {
-	created_by: string;
-	goal_id: string;
-	title: string;
-	goal: number;
-	metaText: string;
-	pubToken?: string | null;
-	priToken?: string | null;
-	created_at: string;
-	status: "Active" | "Inactive";
-};
+import { Goal, GoalValues, ContributorValues } from "@/lib/types";
 
 export function GoalsDialog({
 	children,
@@ -75,14 +64,18 @@ export function GoalsDialog({
 	);
 
 	// Join
-	const [joinToken, setJoinToken] = useState("");
-	const [section, setSection] = useState("");
-	const [company, setCompany] = useState("");
+	const [contributor, setContributor] = useState<ContributorValues>({
+		token: "",
+		section: "",
+		company: "",
+	});
 
 	// Create / Edit
-	const [createTitle, setCreateTitle] = useState("");
-	const [createGoal, setCreateGoal] = useState<number>(400);
-	const [editingId, setEditingId] = useState<string | null>(null);
+	const [goalValues, setGoalValues] = useState<GoalValues>({
+		goal_id: undefined,
+		title: "",
+		goal: 400,
+	});
 
 	const refreshGoals = () => {
 		if (!userId) return;
@@ -106,6 +99,17 @@ export function GoalsDialog({
 		refreshGoals();
 	}, [userId, filterStatus]);
 
+	const handleFormChange = <T extends object>(
+		setState: React.Dispatch<React.SetStateAction<T>>,
+		key: keyof T,
+		value: T[keyof T],
+	) => {
+		setState((prev) => ({
+			...prev,
+			[key]: value,
+		}));
+	};
+
 	const handleJoinGoal = async () => {
 		if (!userId || !userDetails?.role) {
 			showAlert(500, "User details missing");
@@ -113,8 +117,9 @@ export function GoalsDialog({
 		}
 
 		if (
-			!joinToken.trim() ||
-			(userDetails?.role === "Student" && (!section.trim() || !company.trim()))
+			!contributor.token.trim() ||
+			(userDetails?.role === "Student" &&
+				(!contributor.section?.trim() || !contributor.company?.trim()))
 		) {
 			showAlert(400, "Please enter all required fields");
 			return;
@@ -123,14 +128,20 @@ export function GoalsDialog({
 		await insertContributor(
 			userId,
 			userDetails.role,
-			{ token: joinToken, section, company },
+			{
+				token: contributor.token,
+				section: contributor.section,
+				company: contributor.company,
+			},
 			showAlert,
 			setIsLoading,
 		);
 
-		setJoinToken("");
-		setSection("");
-		setCompany("");
+		setContributor({
+			token: "",
+			section: "",
+			company: "",
+		});
 		refreshGoals();
 	};
 
@@ -139,7 +150,11 @@ export function GoalsDialog({
 			showAlert(500, "User details missing");
 			return;
 		}
-		if (!createTitle.trim() || createGoal <= 0 || createGoal > 2000) {
+		if (
+			!goalValues.title?.trim() ||
+			goalValues.goal! <= 0 ||
+			goalValues.goal! > 2000
+		) {
 			showAlert(400, "Invalid goal details");
 			return;
 		}
@@ -148,29 +163,36 @@ export function GoalsDialog({
 			await insertGoal(
 				userId,
 				userDetails.role,
-				{ title: createTitle, goal: createGoal },
+				{ title: goalValues.title, goal: goalValues.goal },
 				showAlert,
 				setIsLoading,
 			);
-		} else if (editingId) {
+		} else if (goalValues.goal_id) {
 			await updateGoalDetails(
-				editingId,
-				{ title: createTitle, goal: createGoal },
+				{
+					goal_id: goalValues.goal_id,
+					title: goalValues.title,
+					goal: goalValues.goal,
+				},
 				showAlert,
 				setIsLoading,
 			);
 		}
 
-		setEditingId(null);
-		setCreateTitle("");
-		setCreateGoal(400);
+		setGoalValues({
+			goal_id: undefined,
+			title: "",
+			goal: 400,
+		});
 		refreshGoals();
 	};
 
 	const handleEditGoal = (goal: Goal) => {
-		setEditingId(goal.goal_id);
-		setCreateTitle(goal.title);
-		setCreateGoal(goal.goal);
+		setGoalValues({
+			goal_id: goal.goal_id,
+			title: goal.title,
+			goal: goal.goal,
+		});
 		setMode("create");
 	};
 
@@ -237,20 +259,26 @@ export function GoalsDialog({
 					<div className="flex gap-2 items-end">
 						<Input
 							placeholder="Enter goal token"
-							value={joinToken}
-							onChange={(e) => setJoinToken(e.target.value)}
+							value={contributor.token}
+							onChange={(e) =>
+								handleFormChange(setContributor, "token", e.target.value)
+							}
 						/>
 						{userDetails?.role === "Student" && (
 							<>
 								<Input
 									placeholder="Enter section"
-									value={section}
-									onChange={(e) => setSection(e.target.value)}
+									value={contributor.section}
+									onChange={(e) =>
+										handleFormChange(setContributor, "section", e.target.value)
+									}
 								/>
 								<Input
 									placeholder="Enter company"
-									value={company}
-									onChange={(e) => setCompany(e.target.value)}
+									value={contributor.company}
+									onChange={(e) =>
+										handleFormChange(setContributor, "company", e.target.value)
+									}
 								/>
 							</>
 						)}
@@ -266,18 +294,24 @@ export function GoalsDialog({
 					<div className="flex gap-2 items-end">
 						<Input
 							placeholder="Title"
-							value={createTitle}
-							onChange={(e) => setCreateTitle(e.target.value)}
+							value={goalValues.title}
+							onChange={(e) =>
+								handleFormChange(setGoalValues, "title", e.target.value)
+							}
 							maxLength={50}
 						/>
 						<Input
 							type="number"
-							value={createGoal}
-							onChange={(e) => setCreateGoal(Number(e.target.value))}
+							value={goalValues.goal}
+							onChange={(e) =>
+								handleFormChange(setGoalValues, "goal", Number(e.target.value))
+							}
 							max={2000}
 						/>
-						<Button onClick={() => handleGoal(editingId ? "edit" : "create")}>
-							{editingId ? "Update" : "Create"}
+						<Button
+							onClick={() => handleGoal(goalValues.goal_id ? "edit" : "create")}
+						>
+							{goalValues.goal_id ? "Update" : "Create"}
 						</Button>
 					</div>
 				)}

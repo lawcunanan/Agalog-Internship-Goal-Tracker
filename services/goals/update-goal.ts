@@ -1,18 +1,15 @@
 import { supabase } from "@/lib/supabase";
+import { GoalValues } from "@/lib/types";
 
 export const updateGoalDetails = async (
-	goalId: string,
-	values: {
-		title?: string;
-		goal?: number;
-	},
+	values: GoalValues,
 	showAlert: (status: number, message: string) => void,
 	setIsLoading: (loading: boolean) => void,
 ) => {
 	setIsLoading(true);
 
 	try {
-		if (!goalId) throw new Error("Goal ID is required");
+		if (!values.goal_id) throw new Error("Goal ID is required");
 
 		const { error } = await supabase
 			.from("goals")
@@ -20,7 +17,7 @@ export const updateGoalDetails = async (
 				title: values.title,
 				goal: values.goal || 400,
 			})
-			.eq("goal_id", goalId);
+			.eq("goal_id", values.goal_id);
 
 		if (error) throw error;
 

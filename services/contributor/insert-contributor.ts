@@ -1,9 +1,10 @@
 import { supabase } from "@/lib/supabase";
+import { ContributorValues } from "@/lib/types";
 
 export const insertContributor = async (
 	userId: string,
 	role: "Student" | "Admin" | "Super Admin",
-	values: { token: string; section?: string; company?: string },
+	values: ContributorValues,
 	showAlert: (status: number, message: string) => void,
 	setIsLoading: (loading: boolean) => void,
 ) => {

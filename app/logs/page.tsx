@@ -3,19 +3,21 @@
 import { useState } from "react";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { HoursProgress } from "@/components/logs/hours-progress";
 
 export default function LogsPage() {
 	const [selectedGoal, setSelectedGoal] = useState<string>("");
+
 	return (
-		<main className="min-h-screen flex flex-col">
+		<div className="min-h-screen flex flex-col relative md:overflow-hidden">
 			<Header selectedGoal={selectedGoal} setSelectedGoal={setSelectedGoal} />
-			<div className="flex-1 p-4 pt-24 flex flex-col items-center">
-				<div className="max-w-300 w-full">
-					<h1 className="text-2xl font-bold mb-4">Logs: {selectedGoal}</h1>
-					<p>Welcome to your logs page. </p>
+			<main className="flex-1 w-full max-w-300 mx-auto px-6 grid md:grid-cols-2 gap-20 h-screen ">
+				<div className="flex flex-col pt-28 md:pt-42 w-full lg:max-w-md">a</div>
+				<div className="md:overflow-y-auto no-scrollbar pt-0 md:pt-42 ">
+					<HoursProgress completed={200.23} required={400} />
+					<Footer />
 				</div>
-			</div>
-			<Footer />
-		</main>
+			</main>
+		</div>
 	);
 }
